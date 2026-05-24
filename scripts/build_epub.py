@@ -7,6 +7,8 @@ from collections import defaultdict
 
 OUTPUT_DIR = "./epub"
 CSS_PATH = "./scripts/epub.css"
+PDF_FONT_DIR = "./website/static/fonts"
+PDF_MAIN_FONT = "Roboto"
 
 paths = [
     "./chapters/lotm/webnovel/",
@@ -128,6 +130,8 @@ ___
             "--from=markdown",
             "--to=pdf",
             "--pdf-engine=typst",
+            f"--pdf-engine-opt=--font-path={PDF_FONT_DIR}",
+            "-V", f"mainfont={PDF_MAIN_FONT}",
             "--toc",
             "--toc-depth=3",
             "-o", pdf_path,
