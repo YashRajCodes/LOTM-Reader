@@ -39,14 +39,18 @@ for path in paths:
     print(f"{'-'*5}> Replacing Sections")
     for section in chapters:
         chapters[section].sort(key=lambda x: int(x["index"]))
-        print(f"Processing section: {section} ({len(chapters[section])} chapters)")
+        print(f"Processing section: {section} ({len(chapters[section])} chapters)", flush=True)
         content = ""
-        for chapter in chapters[section]:
-            chapter = chapter["content"].strip()
-            content += f"""{chapter}
+        
+        for chapter_data in chapters[section]:
+            # Use chapter_data instead of overwriting the 'chapter' loop variable
+            chapter_content = chapter_data["content"].strip()
+            discussion_id = chapter_data.get("discussion", "")
+            
+            content += f"""{chapter_content}
 
 ___
-- [Read Comments](https://github.com/Bittu5134/LOTM-Reader/discussions/{metadata["discussion"]})
+- [Read Comments](https://github.com/Bittu5134/LOTM-Reader/discussions/{discussion_id})
 - [Discord](https://discord.gg/XmzJVsyuTQ)
 
 """
@@ -120,28 +124,23 @@ ___
         cover_path_abs = os.path.abspath(f"{img_folder}/{bookID}/cover{img_format}")
         pdf_md_content = f"![Cover]({cover_path_abs})\n\n<div class='page-break'></div>\n\n" + current_content
 
-        process = subprocess.run(
-            [
-                "pandoc",
-                "--from=markdown",
-                "--to=html5",
-                "--standalone",
-                "--toc",
-                "--toc-depth=3",
-            ],
-            input=pdf_md_content, # Pass the content with cover prepended
-            capture_output=True,
+        pdf_cmd = [
+            "pandoc",
+            "--from=markdown",
+            "--to=pdf",
+            "--pdf-engine=typst",
+            "--toc",
+            "--toc-depth=3",
+            "-o", pdf_path,
+        ]
+
+        subprocess.run(
+            pdf_cmd,
+            input=pdf_md_content, 
             text=True,
             encoding="utf-8",
             check=True
         )
-        html_content = process.stdout
-
-        HTML(string=html_content, base_url=os.getcwd()).write_pdf(
-            pdf_path,
-            stylesheets=[CSS(filename=CSS_PATH)],
-        )
-
         print(f"Done! {build_type} PDF available at: {pdf_path}")
 
     print("")
