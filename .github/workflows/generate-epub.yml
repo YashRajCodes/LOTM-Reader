@@ -38,7 +38,7 @@ jobs:
       
       # 5. Setup Typst
       - name: Setup Typst
-        uses: typst-community/setup-typst@v3
+        uses: typst-community/setup-typst@v5
       
       # 6. Run your Image Manipulator Script
       - name: Process Images
