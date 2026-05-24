@@ -4,7 +4,6 @@ import subprocess
 import frontmatter
 import datetime
 from collections import defaultdict
-from weasyprint import CSS, HTML
 
 OUTPUT_DIR = "./epub"
 CSS_PATH = "./scripts/epub.css"
