@@ -4,13 +4,17 @@ import subprocess
 import frontmatter
 import datetime
 from collections import defaultdict
+from weasyprint import CSS, HTML
+
+OUTPUT_DIR = "./epub"
+CSS_PATH = "./scripts/epub.css"
 
 paths = [
     "./chapters/lotm/webnovel/",
     "./chapters/lotm/oldtl/",
     "./chapters/coi/webnovel/",
 ]
-os.makedirs("./epub", exist_ok=True)
+os.makedirs(OUTPUT_DIR, exist_ok=True)
 today = datetime.date.today().strftime("%B %d, %Y")
 
 for path in paths:
@@ -52,7 +56,7 @@ ___
         bookTL = masterMD["metaTl"]
         masterMD.content = masterMD.content.replace(f"<!-- [{section}] -->", content)
 
-    print(f"{'-'*5}> Producing Epubs")
+    print(f"{'-'*5}> Producing EPUBs and PDFs")
 
     for build_type in ["Default", "Legacy"]:
         # 1. Determine Image Settings
@@ -77,12 +81,14 @@ ___
 
         # 3. Define Filenames
         epub_filename = f"{bookTitle} - {bookTL} [{build_type}].epub"
+        pdf_filename = f"{bookTitle} - {bookTL} [{build_type}].pdf"
         md_filename = (
             f"{bookID}_{bookTL}_{build_type}.md"  # Unique temp file per build type
         )
 
-        epub_path = os.path.join("./epub", epub_filename)
-        md_path = os.path.join("./epub", md_filename)
+        epub_path = os.path.join(OUTPUT_DIR, epub_filename)
+        pdf_path = os.path.join(OUTPUT_DIR, pdf_filename)
+        md_path = os.path.join(OUTPUT_DIR, md_filename)
 
         # 4. Save Temporary Markdown
         # We create a new Post object to avoid modifying the original masterMD in the loop
@@ -100,7 +106,7 @@ ___
             epub_path,
             f"--to={epub_version}",  # <--- DYNAMIC VERSION HERE
             "--css",
-            "./scripts/epub.css",
+            CSS_PATH,
             "--toc",
             "--toc-depth=3",
             "--split-level=2",
@@ -110,5 +116,32 @@ ___
 
         subprocess.run(cmd, check=True)  # Added check=True to catch errors
         print(f"Done! {build_type} EPUB available at: {epub_path}")
+
+        cover_path_abs = os.path.abspath(f"{img_folder}/{bookID}/cover{img_format}")
+        pdf_md_content = f"![Cover]({cover_path_abs})\n\n<div class='page-break'></div>\n\n" + current_content
+
+        process = subprocess.run(
+            [
+                "pandoc",
+                "--from=markdown",
+                "--to=html5",
+                "--standalone",
+                "--toc",
+                "--toc-depth=3",
+            ],
+            input=pdf_md_content, # Pass the content with cover prepended
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            check=True
+        )
+        html_content = process.stdout
+
+        HTML(string=html_content, base_url=os.getcwd()).write_pdf(
+            pdf_path,
+            stylesheets=[CSS(filename=CSS_PATH)],
+        )
+
+        print(f"Done! {build_type} PDF available at: {pdf_path}")
 
     print("")
