@@ -70,3 +70,4 @@ jobs:
           prerelease: false
           files: |
             epub/*.epub
+            epub/*.pdf
