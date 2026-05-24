@@ -2,6 +2,7 @@ import os
 import subprocess
 import time
 import re
+import shutil
 from concurrent.futures import ProcessPoolExecutor, as_completed
 
 # ============================================================
@@ -14,6 +15,7 @@ WEBP_DIR = "./images_default"
 # Output for B&W legacy EPUB images
 JPEG_DIR = "./images_legacy"
 
+MAGICK_CMD = "magick" if shutil.which("magick") else "convert"
 
 def gh_log(msg, log_type="info"):
     """Format logs for GitHub Actions UI - Emoji safe for Windows"""
@@ -49,7 +51,7 @@ def process_image_suite(paths):
         # 1. High-Quality WebP (Resize only if larger than 2000px)
         # Using -resize 2000x2000> ensures we don't upscaled small images
         cmd_webp = [
-            "magick",
+            MAGICK_CMD,
             input_path,
             "-resize",
             "1600x1600>",
@@ -62,7 +64,7 @@ def process_image_suite(paths):
 
         # 2. Legacy JPEG (Small, Grayscale for old Kindles/E-readers)
         cmd_jpeg = [
-            "magick",
+            MAGICK_CMD,
             input_path,
             "-resize", "800x800>",
             "-colorspace", "gray",       # Forces 8-bit grayscale (saves 66% space over color)
