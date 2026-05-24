@@ -7,8 +7,11 @@ from collections import defaultdict
 
 OUTPUT_DIR = "./epub"
 CSS_PATH = "./scripts/epub.css"
-PDF_FONT_DIR = "./website/static/fonts"
-PDF_MAIN_FONT = "Roboto"
+PDF_FONT_DIR = os.path.abspath("./website/static/fonts")
+PDF_MAIN_FONT = "Bookerly"
+
+if not os.path.isdir(PDF_FONT_DIR):
+    raise FileNotFoundError(f"PDF font directory not found: {PDF_FONT_DIR}")
 
 paths = [
     "./chapters/lotm/webnovel/",
