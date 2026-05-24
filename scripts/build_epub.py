@@ -120,8 +120,8 @@ ___
         subprocess.run(cmd, check=True)  # Added check=True to catch errors
         print(f"Done! {build_type} EPUB available at: {epub_path}")
 
-        cover_path_abs = os.path.abspath(f"{img_folder}/{bookID}/cover{img_format}")
-        pdf_md_content = f"![Cover]({cover_path_abs})\n\n<div class='page-break'></div>\n\n" + current_content
+        cover_path = f"{img_folder}/{bookID}/cover{img_format}"
+        pdf_md_content = f"![Cover]({cover_path})\n\n<div class='page-break'></div>\n\n" + current_content
 
         pdf_cmd = [
             "pandoc",
